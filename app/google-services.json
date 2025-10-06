@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "660782234877",
+    "project_id": "tastemeal-2f1d1",
+    "storage_bucket": "tastemeal-2f1d1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:660782234877:android:6ae7615e0d4c1410fc5294",
+        "android_client_info": {
+          "package_name": "com.example.recipeapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_SuU4veV3TBh5aWOXEnLCpuOzcnR6z1M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:660782234877:android:78b2f4bc3c966cdffc5294",
+        "android_client_info": {
+          "package_name": "com.example.tastemeal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_SuU4veV3TBh5aWOXEnLCpuOzcnR6z1M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -3,24 +3,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/recipeListFragment">
+    app:startDestination="@id/nav_home">
 
     <fragment
-        android:id="@+id/recipeListFragment"
-        android:name="com.example.recipeapp.ui.RecipeListFragment"
-        android:label="RecipeListFragment"
-        tools:layout="@layout/fragment_recipe_list">
+        android:id="@+id/nav_home"
+        android:name="com.example.recipeapp.HomeFragment"
+        android:label="Recipes"
+        tools:layout="@layout/fragment_home" >
+
         <action
-            android:id="@+id/action_recipeListFragment_to_recipeDetailsFragment"
+            android:id="@+id/action_nav_home_to_recipeDetailsFragment"
             app:destination="@id/recipeDetailsFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/recipeDetailsFragment"
         android:name="com.example.recipeapp.ui.RecipeDetailsFragment"
-        android:label="RecipeDetailsFragment"
+        android:label="Recipe Details"
         tools:layout="@layout/fragment_recipe_details">
         <argument
             android:name="recipe"
             app:argType="com.example.recipeapp.model.Recipe" />
     </fragment>
+
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="com.example.recipeapp.AboutFragment"
+        android:label="About Us"
+        tools:layout="@layout/fragment_about" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.recipeapp.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings"/>
+
 </navigation>

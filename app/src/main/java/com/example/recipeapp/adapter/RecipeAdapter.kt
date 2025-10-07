@@ -7,9 +7,9 @@ import android.widget.TextView
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.recipeapp.HomeFragmentDirections
 import com.example.recipeapp.R
 import com.example.recipeapp.model.Recipe
-import com.example.recipeapp.ui.RecipeListFragmentDirections
 
 class RecipeAdapter(private val recipes: List<Recipe>) : RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
 
@@ -33,7 +33,7 @@ class RecipeAdapter(private val recipes: List<Recipe>) : RecyclerView.Adapter<Re
             .into(holder.recipeImage)
 
         holder.itemView.setOnClickListener {
-            val direction = RecipeListFragmentDirections.actionRecipeListFragmentToRecipeDetailsFragment(currentRecipe)
+            val direction = HomeFragmentDirections.actionNavHomeToRecipeDetailsFragment(currentRecipe)
             holder.itemView.findNavController().navigate(direction)
         }
     }

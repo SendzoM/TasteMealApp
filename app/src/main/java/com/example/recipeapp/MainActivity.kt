@@ -20,6 +20,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.recipeapp.R
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,6 +28,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var navController: NavController
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
 
@@ -76,32 +80,69 @@ class MainActivity : AppCompatActivity() {
             headerView.findViewById<TextView>(R.id.UserEmail_nav) // We will add this ID
 
         // Get the current user from Firebase
-        val user = auth.currentUser
+        val currentUser = auth.currentUser
 
-        if (user != null) {
-            // User is logged in, let's get their data
-            val userName = user.displayName ?: "Recipe Lover" // Fallback name
-            val userEmail = user.email ?: "No Email" // Fallback email
+        if (currentUser != null) {
+            // --- START: FETCH FROM FIRESTORE ---
+            val userRef = db.collection("users").document(currentUser.uid)
+            userRef.get().addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val userName = document.getString("username") ?: "Recipe Lover"
+                    val userEmail = document.getString("email") ?: "No Email"
 
-            // Set the username and email
-            headerUsername.text = userName
-            headerUserEmail.text = userEmail
+                    // Set the username and email from Firestore data
+                    headerUsername.text = userName
+                    headerUserEmail.text = userEmail
 
-            // Set the initials (first two letters, uppercase)
-            if (userName.isNotEmpty()) {
-                headerUserInitials.text = if (userName.length >= 2) {
-                    userName.substring(0, 2).uppercase()
+                    // Set the initials
+                    if (userName.isNotEmpty()) {
+                        headerUserInitials.text = if (userName.length >= 2) {
+                            userName.substring(0, 2).uppercase()
+                        } else {
+                            userName.uppercase()
+                        }
+                    } else {
+                        headerUserInitials.text = "RL" // Fallback initials
+                    }
                 } else {
-                    userName.uppercase()
+                    // Document doesn't exist, use auth data as a fallback
+                    populateHeaderWithAuthFallback()
                 }
-            } else {
-                headerUserInitials.text = "RL" // Fallback initials
+            }.addOnFailureListener {
+                // Failed to fetch, use auth data as a fallback
+                populateHeaderWithAuthFallback()
             }
         } else {
             // User is not logged in (or data is not available), show default text
             headerUsername.text = "Guest User"
             headerUserEmail.text = "guest@example.com"
             headerUserInitials.text = "GU"
+        }
+    }
+
+    // Helper function for fallback to prevent code duplication
+    private fun populateHeaderWithAuthFallback() {
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        val headerView = navigationView.getHeaderView(0)
+        val headerUserInitials = headerView.findViewById<TextView>(R.id.UserInitials)
+        val headerUsername = headerView.findViewById<TextView>(R.id.Username_nav)
+        val headerUserEmail = headerView.findViewById<TextView>(R.id.UserEmail_nav)
+        val user = auth.currentUser
+
+        val userName = user?.displayName ?: "Recipe Lover"
+        val userEmail = user?.email ?: "No Email"
+
+        headerUsername.text = userName
+        headerUserEmail.text = userEmail
+
+        if (userName.isNotEmpty()) {
+            headerUserInitials.text = if (userName.length >= 2) {
+                userName.substring(0, 2).uppercase()
+            } else {
+                userName.uppercase()
+            }
+        } else {
+            headerUserInitials.text = "RL"
         }
     }
 

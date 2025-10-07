@@ -13,10 +13,13 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.recipeapp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 
 class CreateAccount : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var db : FirebaseFirestore
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +31,8 @@ class CreateAccount : AppCompatActivity() {
             insets
         }
         auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
         //Get references to the EditText views
         val editTextUsername = findViewById<EditText>(R.id.Username)
         val editTextEmail = findViewById<EditText>(R.id.email)
@@ -73,36 +78,40 @@ class CreateAccount : AppCompatActivity() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        val user = auth.currentUser
+                        val user = auth.currentUser!!
                         val profileUpdates = UserProfileChangeRequest.Builder()
                             .setDisplayName(username)
                             .build()
-                        user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
+                        user.updateProfile(profileUpdates).addOnCompleteListener { profileTask ->
                             if (profileTask.isSuccessful) {
-                                Toast.makeText(
-                                    this,
-                                    "User created successfully",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                val intent = Intent(this, Login::class.java)
-                                intent.putExtra("USER_NAME", username)
-                                startActivity(intent)
-                                finish()
+                                val userMap = hashMapOf(
+                                    "username" to username,
+                                    "email" to email
+                                )
+                                db.collection("users").document(user.uid)
+                                    .set(userMap)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this, "User created successfully", Toast.LENGTH_SHORT).show()
+                                        startActivity(Intent(this, Login::class.java))
+                                        finish()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(this, "Failed to save user details: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                // --- END: SAVE USER TO FIRESTORE ---
                             } else {
-                                Toast.makeText(
-                                    this,
-                                    "Error: ${task.exception?.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(this, "Error setting profile name: ${profileTask.exception?.message}", Toast.LENGTH_SHORT).show()
                             }
                         }
-                    }
-
-                    Sign_in_link.setOnClickListener {
-                        startActivity(Intent(this, Login::class.java))
-                        finish()
+                    } else {
+                        Toast.makeText(this, "Account creation failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                     }
                 }
         }
+
+          Sign_in_link.setOnClickListener {
+           startActivity(Intent(this, Login::class.java))
+           finish()
+          }
     }
 }

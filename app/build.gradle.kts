@@ -64,6 +64,7 @@ dependencies {
 
     // Firebase Libraries (no versions needed with BoM)
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

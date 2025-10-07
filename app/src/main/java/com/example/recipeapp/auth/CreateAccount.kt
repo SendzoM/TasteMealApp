@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.recipeapp.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 
 class CreateAccount : AppCompatActivity() {
 
@@ -72,22 +73,36 @@ class CreateAccount : AppCompatActivity() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(this, "User created successfully", Toast.LENGTH_SHORT).show()
+                        val user = auth.currentUser
+                        val profileUpdates = UserProfileChangeRequest.Builder()
+                            .setDisplayName(username)
+                            .build()
+                        user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
+                            if (profileTask.isSuccessful) {
+                                Toast.makeText(
+                                    this,
+                                    "User created successfully",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                val intent = Intent(this, Login::class.java)
+                                intent.putExtra("USER_NAME", username)
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    "Error: ${task.exception?.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+
+                    Sign_in_link.setOnClickListener {
                         startActivity(Intent(this, Login::class.java))
                         finish()
-                    } else {
-                        Toast.makeText(
-                            this,
-                            "Error: ${task.exception?.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
                     }
                 }
-        }
-
-        Sign_in_link.setOnClickListener {
-            startActivity(Intent(this, Login::class.java))
-            finish()
         }
     }
 }

@@ -6,10 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipeapp.model.Recipe
 import com.example.recipeapp.model.RecipeRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import androidx.lifecycle.ViewModelProvider
+
 
 class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
 
@@ -22,23 +20,35 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private var currentPage = 1
+    private var isFetching = false
+
     init {
         loadRecipes()
     }
 
     fun loadRecipes() {
-        _isLoading.value = true
+        // Prevent multiple simultaneous requests
+        if (isFetching) return
+        isFetching = true
+
         viewModelScope.launch {
+            _isLoading.postValue(true)
             try {
-                val recipeList = withContext(Dispatchers.IO) {
-                    repository.getRecipes()
+                val newRecipes = repository.getRecipes(currentPage)
+                if (newRecipes.isNotEmpty()) {
+                    // Get the current list, or an empty list if it's the first time
+                    val currentList = _recipes.value ?: emptyList()
+                    // Add the new recipes to the existing list
+                    _recipes.postValue(currentList + newRecipes)
+                    currentPage++ // Increment the page for the next request
                 }
-                _recipes.value = recipeList
-            } catch (e: Exception) {
-                _errorMessage.value = "Error fetching recipes: ${e.message}"
-            } finally {
-                _isLoading.value = false
+                } catch (e: Exception) {
+                    _errorMessage.postValue("Failed to load recipes: ${e.message}")
+                } finally {
+                    _isLoading.postValue(false)
+                    isFetching = false // Allow new requests
+                }
             }
         }
     }
-}

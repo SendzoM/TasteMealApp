@@ -57,7 +57,8 @@ class Login : AppCompatActivity() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        startActivity(Intent(this, MainActivity::class.java))
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
                         Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
                         finish()
                     } else {

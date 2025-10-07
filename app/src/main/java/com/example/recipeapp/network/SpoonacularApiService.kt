@@ -7,7 +7,8 @@ import retrofit2.http.Query
 interface SpoonacularApiService {
     @GET("recipes/random")
     suspend fun getRandomRecipes(
-        @Query("number") number: Int = 10
+        @Query("number") number: Int = 10,
+        @Query("page") page: Int
     ): RecipeResponse
 
 

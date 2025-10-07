@@ -11,7 +11,7 @@ import com.example.recipeapp.HomeFragmentDirections
 import com.example.recipeapp.R
 import com.example.recipeapp.model.Recipe
 
-class RecipeAdapter(private val recipes: List<Recipe>) : RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
+class RecipeAdapter(private var recipes: List<Recipe>) : RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
 
     class RecipeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val recipeImage: ImageView = itemView.findViewById(R.id.recipe_image)
@@ -39,4 +39,10 @@ class RecipeAdapter(private val recipes: List<Recipe>) : RecyclerView.Adapter<Re
     }
 
     override fun getItemCount() = recipes.size
+
+    fun updateRecipes(newRecipes: List<Recipe>) {
+        recipes = newRecipes
+        // Notify the adapter that the data set has changed.
+        notifyDataSetChanged()
+    }
 }

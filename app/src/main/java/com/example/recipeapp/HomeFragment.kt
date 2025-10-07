@@ -24,6 +24,8 @@ class HomeFragment : Fragment() {
     private lateinit var recipeViewModel: RecipeViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
+    private lateinit var recipeAdapter: RecipeAdapter
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,11 +46,30 @@ class HomeFragment : Fragment() {
 
         recipeViewModel = ViewModelProvider(this, factory).get(RecipeViewModel::class.java)
 
-        recyclerView.layoutManager = GridLayoutManager(context, 2)
+        // Initialize the adapter with an empty list first
+        recipeAdapter = RecipeAdapter(emptyList())
+        val gridLayoutManager = GridLayoutManager(context, 2)
+        recyclerView.layoutManager = gridLayoutManager
+        recyclerView.adapter = recipeAdapter
 
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val visibleItemCount = gridLayoutManager.childCount
+                val totalItemCount = gridLayoutManager.itemCount
+                val firstVisibleItemPosition = gridLayoutManager.findFirstVisibleItemPosition()
+
+                // Check if we're near the end of the list
+                if (!recipeViewModel.isLoading.value!! && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
+                    // We've reached the end, load more recipes!
+                    recipeViewModel.loadRecipes()
+                }
+            }
+        })
         // Observe recipes LiveData with explicit type
         recipeViewModel.recipes.observe(viewLifecycleOwner, Observer { recipes: List<Recipe> ->
-            recyclerView.adapter = RecipeAdapter(recipes)
+            recipeAdapter.updateRecipes(recipes) // A new method we will add to the adapter
         })
 
         recipeViewModel.errorMessage.observe(viewLifecycleOwner, Observer { errorMessage: String ->
@@ -56,7 +77,12 @@ class HomeFragment : Fragment() {
         })
 
         recipeViewModel.isLoading.observe(viewLifecycleOwner, Observer { isLoading: Boolean ->
-            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            // Only show the big progress bar if the list is empty
+            if (isLoading && recipeAdapter.itemCount == 0) {
+                progressBar.visibility = View.VISIBLE
+            } else {
+                progressBar.visibility = View.GONE
+            }
         })
     }
 

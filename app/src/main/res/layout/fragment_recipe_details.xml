@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,6 +35,39 @@
             android:layout_marginTop="8dp"
             android:textSize="16sp"
             tools:text="Recipe Summary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ingredients"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/recipe_ingredients"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="16sp"
+            tools:text="- 1 cup flour\n- 2 eggs\n- 1/2 cup milk" />
+
+        <!--  NEW: INSTRUCTIONS SECTION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Instructions"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/recipe_instructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="16sp"
+            tools:text="1. Mix flour and eggs.\n2. Add milk and stir.\n3. Cook on a pan." />
 
         <TextView
             android:id="@+id/recipe_source_url"

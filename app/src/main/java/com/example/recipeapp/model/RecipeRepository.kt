@@ -13,4 +13,12 @@ class RecipeRepository(private val apiService: SpoonacularApiService) {
             emptyList()
         }
     }
+    suspend fun getRecipeDetails(id: Int): Recipe? {
+        return try {
+            apiService.getRecipeInformation(id)
+        } catch (e: Exception) {
+            println("Error fetching recipe details: ${e.message}")
+            null
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.example.recipeapp.ui
 
 import android.os.Build
 import android.os.Bundle
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,18 +10,27 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.recipeapp.R
 import com.example.recipeapp.model.Recipe
+import com.example.recipeapp.model.RecipeRepository
+import com.example.recipeapp.network.RetrofitInstance
+import com.example.recipeapp.viewmodel.RecipeViewModel
+import com.example.recipeapp.viewmodel.RecipeViewModelFactory
 
 class RecipeDetailsFragment : Fragment() {
 
-    private var recipe: Recipe? = null
+    private lateinit var recipeViewModel: RecipeViewModel
+    private var recipeId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Get the recipe ID and basic info from the navigation arguments
         arguments?.let {
-            recipe = RecipeDetailsFragmentArgs.fromBundle(it).recipe
+            val safeArgs = RecipeDetailsFragmentArgs.fromBundle(it)
+            recipeId = safeArgs.recipe.id
         }
     }
 
@@ -36,33 +46,43 @@ class RecipeDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Now populate views with recipe data
-        recipe?.let {
-            view.findViewById<TextView>(R.id.recipe_title).text = it.title
+        val apiService = RetrofitInstance.api
+        val recipeRepository = RecipeRepository(apiService)
+        val factory = RecipeViewModelFactory(recipeRepository)
+        recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)
 
-            // Use fromHtml to properly display the summary, which might contain HTML tags
-            val summaryTextView = view.findViewById<TextView>(R.id.recipe_summary)
-            summaryTextView.text = android.text.Html.fromHtml(it.summary, android.text.Html.FROM_HTML_MODE_COMPACT)
+        // Observe the detailed recipe LiveData
+        recipeViewModel.recipeDetails.observe(viewLifecycleOwner, Observer { recipe ->
+            recipe?.let {
+                populateUi(it)
+            }
+        })
 
-            // --- THIS IS THE FIX ---
-            // Find the source URL TextView and set its text
-            val sourceUrlTextView = view.findViewById<TextView>(R.id.recipe_source_url)
-            sourceUrlTextView.text = it.sourceUrl
-
-            val imageView = view.findViewById<ImageView>(R.id.recipe_image)
-            Glide.with(requireContext())
-                .load(it.image)
-                .into(imageView)
+        // Fetch the details using the ID from arguments
+        if (recipeId != -1) {
+            recipeViewModel.fetchRecipeDetails(recipeId)
         }
     }
 
-    companion object {
-        fun newInstance(recipe: Recipe): RecipeDetailsFragment {
-            val fragment = RecipeDetailsFragment()
-            val args = Bundle()
-            args.putParcelable("recipe", recipe)
-            fragment.arguments = args
-            return fragment
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun populateUi(recipe: Recipe) {
+        view?.apply {
+            findViewById<TextView>(R.id.recipe_title).text = recipe.title
+            findViewById<TextView>(R.id.recipe_summary).text = Html.fromHtml(recipe.summary, Html.FROM_HTML_MODE_COMPACT)
+
+            val imageView = findViewById<ImageView>(R.id.recipe_image)
+            Glide.with(requireContext()).load(recipe.image).into(imageView)
+
+            // --- POPULATE NEW FIELDS ---
+            // Format and display ingredients
+            val ingredientsTextView = findViewById<TextView>(R.id.recipe_ingredients)
+            val ingredientsText = recipe.extendedIngredients?.joinToString(separator = "\n") { "- ${it.original}" } ?: "No ingredients available."
+            ingredientsTextView.text = ingredientsText
+
+            // Format and display instructions
+            val instructionsTextView = findViewById<TextView>(R.id.recipe_instructions)
+            val instructionsText = recipe.analyzedInstructions?.firstOrNull()?.steps?.joinToString(separator = "\n") { "${it.number}. ${it.step}" } ?: "No instructions available."
+            instructionsTextView.text = instructionsText
         }
     }
 }

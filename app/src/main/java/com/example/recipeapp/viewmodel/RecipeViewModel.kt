@@ -13,7 +13,9 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
 
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> = _recipes
-
+    private val _recipeDetails = MutableLiveData<Recipe?>()
+    val recipeDetails: LiveData<Recipe?> = _recipeDetails
+    //
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> = _errorMessage
 
@@ -51,4 +53,18 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
                 }
             }
         }
+
+    fun fetchRecipeDetails(id: Int) {
+        viewModelScope.launch {
+            _isLoading.postValue(true)
+            try {
+                val details = repository.getRecipeDetails(id)
+                _recipeDetails.postValue(details)
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to load details: ${e.message}")
+            } finally {
+                _isLoading.postValue(false)
+            }
+        }
     }
+}

@@ -1,7 +1,9 @@
 package com.example.recipeapp.network
 
+import com.example.recipeapp.model.Recipe
 import com.example.recipeapp.model.RecipeResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface SpoonacularApiService {
@@ -11,7 +13,10 @@ interface SpoonacularApiService {
         @Query("page") page: Int
     ): RecipeResponse
 
-
+    @GET("recipes/{id}/information")
+    suspend fun getRecipeInformation(
+        @Path("id") id: Int
+    ): Recipe
 
     @GET("recipes/complexSearch")
     suspend fun searchRecipes(

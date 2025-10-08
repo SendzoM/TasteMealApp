@@ -2,6 +2,8 @@ package com.example.recipeapp;
 
 import androidx.appcompat.app.AppCompatActivity
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.ViewConfiguration
@@ -14,10 +16,13 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.recipeapp.R
+import com.example.recipeapp.auth.Login
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -61,10 +66,36 @@ class MainActivity : AppCompatActivity() {
         // Connect the Toolbar to the NavController
         // This automatically handles the title and the hamburger/back icon
         setupActionBarWithNavController(navController, appBarConfiguration)
-
         // Connect the NavigationView to the NavController
         // This automatically handles clicks and navigates to the correct fragment
         navigationView.setupWithNavController(navController)
+
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            // Handle logout separately
+            if (menuItem.itemId == R.id.nav_logout) {
+                // Clear saved category preference
+                val sharedPref = getSharedPreferences("RecipeAppPrefs", Context.MODE_PRIVATE)
+                with(sharedPref.edit()) {
+                    remove("SELECTED_CATEGORY")
+                    apply()
+                }
+
+                // Sign out from Firebase
+                auth.signOut()
+
+                // Redirect to Login screen
+                val intent = Intent(this, Login::class.java)
+                startActivity(intent)
+                finish() // Finish MainActivity to prevent user from coming back
+                true
+            } else {
+                // Let the NavController handle other menu items
+                val handled = NavigationUI.onNavDestinationSelected(menuItem, navController)
+                // Close the drawer after a menu item is selected
+                drawerLayout.closeDrawer(GravityCompat.START)
+                handled
+            }
+        }
 
         updateNavHeader()
     }

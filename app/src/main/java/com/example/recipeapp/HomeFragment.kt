@@ -73,12 +73,12 @@ class HomeFragment : Fragment() {
 
         recipeViewModel.recipes.observe(viewLifecycleOwner, Observer { recipes ->
             recipeAdapter.updateRecipes(recipes ?: emptyList())
+        })
 
             // If the list is empty, trigger the initial load with the category
-            if (recipes.isNullOrEmpty()) {
+            if (recipeViewModel.recipes.value.isNullOrEmpty()) {
                 recipeViewModel.loadRecipes(savedCategory)
             }
-        })
 
         recipeViewModel.errorMessage.observe(viewLifecycleOwner, Observer { errorMessage: String ->
             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()

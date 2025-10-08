@@ -24,20 +24,23 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
 
     private var currentPage = 1
     private var isFetching = false
+    private var currentCategory: String? = null
 
-    init {
-        loadRecipes()
-    }
-
-    fun loadRecipes() {
+    fun loadRecipes(category: String?) {
+        viewModelScope.launch {
+        // If the category has changed, reset the list and page number
+        if (category != currentCategory) {
+            currentPage = 1
+            _recipes.postValue(emptyList()) // Clear the list on UI
+            currentCategory = category
+        }
         // Prevent multiple simultaneous requests
-        if (isFetching) return
+        if (isFetching) return@launch
         isFetching = true
 
-        viewModelScope.launch {
             _isLoading.postValue(true)
             try {
-                val newRecipes = repository.getRecipes(currentPage)
+                val tags = if (category.equals("random", ignoreCase = true)) null else category;                val newRecipes = repository.getRecipes(currentPage, tags)
                 if (newRecipes.isNotEmpty()) {
                     // Get the current list, or an empty list if it's the first time
                     val currentList = _recipes.value ?: emptyList()

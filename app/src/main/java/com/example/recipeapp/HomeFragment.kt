@@ -1,5 +1,6 @@
 package com.example.recipeapp
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -31,9 +32,9 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_recipe_list, container, false)
-        recyclerView = view.findViewById(R.id.recipe_recycler_view)
-        progressBar = view.findViewById(R.id.recipe_progress_bar)
+        val view = inflater.inflate(R.layout.fragment_home, container, false)
+        recyclerView = view.findViewById(R.id.home_recipe_recycler_view)
+        progressBar = view.findViewById(R.id.home_progress_bar)
         return view
     }
 
@@ -44,7 +45,7 @@ class HomeFragment : Fragment() {
         val recipeRepository = RecipeRepository(apiService)
         val factory = RecipeViewModelFactory(recipeRepository)
 
-        recipeViewModel = ViewModelProvider(this, factory).get(RecipeViewModel::class.java)
+        recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)
 
         // Initialize the adapter with an empty list first
         recipeAdapter = RecipeAdapter(emptyList())
@@ -52,24 +53,31 @@ class HomeFragment : Fragment() {
         recyclerView.layoutManager = gridLayoutManager
         recyclerView.adapter = recipeAdapter
 
+        val sharedPref = activity?.getSharedPreferences("RecipeAppPrefs", Context.MODE_PRIVATE)
+        val savedCategory = sharedPref?.getString("SELECTED_CATEGORY", "random") ?: "random"
+
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-
                 val visibleItemCount = gridLayoutManager.childCount
                 val totalItemCount = gridLayoutManager.itemCount
                 val firstVisibleItemPosition = gridLayoutManager.findFirstVisibleItemPosition()
 
-                // Check if we're near the end of the list
-                if (!recipeViewModel.isLoading.value!! && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
-                    // We've reached the end, load more recipes!
-                    recipeViewModel.loadRecipes()
+                val isLoading = recipeViewModel.isLoading.value ?: false
+                if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
+                    // Always pass the category when loading more
+                    recipeViewModel.loadRecipes(savedCategory)
                 }
             }
         })
-        // Observe recipes LiveData with explicit type
-        recipeViewModel.recipes.observe(viewLifecycleOwner, Observer { recipes: List<Recipe> ->
-            recipeAdapter.updateRecipes(recipes) // A new method we will add to the adapter
+
+        recipeViewModel.recipes.observe(viewLifecycleOwner, Observer { recipes ->
+            recipeAdapter.updateRecipes(recipes ?: emptyList())
+
+            // If the list is empty, trigger the initial load with the category
+            if (recipes.isNullOrEmpty()) {
+                recipeViewModel.loadRecipes(savedCategory)
+            }
         })
 
         recipeViewModel.errorMessage.observe(viewLifecycleOwner, Observer { errorMessage: String ->

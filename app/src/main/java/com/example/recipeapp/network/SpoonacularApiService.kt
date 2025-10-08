@@ -10,7 +10,8 @@ interface SpoonacularApiService {
     @GET("recipes/random")
     suspend fun getRandomRecipes(
         @Query("number") number: Int = 10,
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("tags") tags: String?
     ): RecipeResponse
 
     @GET("recipes/{id}/information")

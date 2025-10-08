@@ -69,14 +69,5 @@
             android:textSize="16sp"
             tools:text="1. Mix flour and eggs.\n2. Add milk and stir.\n3. Cook on a pan." />
 
-        <TextView
-            android:id="@+id/recipe_source_url"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:autoLink="web"
-            android:textSize="14sp"
-            tools:text="Source URL" />
-
     </LinearLayout>
 </ScrollView>

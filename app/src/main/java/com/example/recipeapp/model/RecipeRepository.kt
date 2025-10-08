@@ -4,9 +4,9 @@ import com.example.recipeapp.network.SpoonacularApiService
 
 class RecipeRepository(private val apiService: SpoonacularApiService) {
 
-    suspend fun getRecipes(page: Int): List<Recipe> {
+    suspend fun getRecipes(page: Int, tags: String?): List<Recipe> {
         return try {
-            val response = apiService.getRandomRecipes(number = 10, page = page)
+            val response = apiService.getRandomRecipes(number = 10, page = page, tags = tags)
             response.recipes
         } catch (e: Exception) {
             println("Error fetching recipes: ${e.message}")

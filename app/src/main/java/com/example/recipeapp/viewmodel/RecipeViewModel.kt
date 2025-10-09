@@ -38,17 +38,17 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
         if (isFetching) return@launch
         isFetching = true
 
-            _isLoading.postValue(true)
-            try {
-                val tags = if (category.equals("random", ignoreCase = true)) null else category
-                val newRecipes = repository.getRecipes(currentPage, tags)
-                if (newRecipes.isNotEmpty()) {
-                    // Get the current list, or an empty list if it's the first time
-                    val currentList = _recipes.value ?: emptyList()
-                    // Add the new recipes to the existing list
-                    _recipes.postValue(currentList + newRecipes)
-                    currentPage++ // Increment the page for the next request
-                    }
+        _isLoading.postValue(true)
+         try {
+             val tags = if (category.equals("random", ignoreCase = true)) null else category
+             val newRecipes = repository.getRecipes(currentPage, tags)
+             if (newRecipes.isNotEmpty()) {
+              // Get the current list, or an empty list if it's the first time
+                 val currentList = _recipes.value ?: emptyList()
+                 // Add the new recipes to the existing list
+                 _recipes.postValue(currentList + newRecipes)
+                 currentPage++ // Increment the page for the next request
+                  }
                 } catch (e: Exception) {
                     _errorMessage.postValue("Failed to load recipes: ${e.message}")
                 } finally {

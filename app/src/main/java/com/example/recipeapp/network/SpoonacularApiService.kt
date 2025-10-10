@@ -2,6 +2,7 @@ package com.example.recipeapp.network
 
 import com.example.recipeapp.model.Recipe
 import com.example.recipeapp.model.RecipeResponse
+import com.example.recipeapp.model.RecipeSearchResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -22,7 +23,8 @@ interface SpoonacularApiService {
     @GET("recipes/complexSearch")
     suspend fun searchRecipes(
         @Query("query") query: String,
-        @Query("number") number: Int = 10
-    ): RecipeResponse
+        @Query("number") number: Int = 10,
+        @Query("addRecipeInformation") addRecipeInformation: Boolean = true
+    ): RecipeSearchResponse
 
 }

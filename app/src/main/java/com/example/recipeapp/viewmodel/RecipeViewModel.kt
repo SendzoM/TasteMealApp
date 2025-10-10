@@ -58,6 +58,21 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
             }
         }
 
+    fun searchRecipes(query: String) {
+        viewModelScope.launch {
+            _isLoading.postValue(true)
+            _recipes.postValue(emptyList()) // Clear previous results immediately
+            try {
+                val searchResults = repository.searchRecipes(query)
+                _recipes.postValue(searchResults)
+            } catch (e: Exception) {
+                _errorMessage.postValue("Search failed: ${e.message}")
+            } finally {
+                _isLoading.postValue(false)
+            }
+        }
+    }
+
     fun fetchRecipeDetails(id: Int) {
         viewModelScope.launch {
             _isLoading.postValue(true)

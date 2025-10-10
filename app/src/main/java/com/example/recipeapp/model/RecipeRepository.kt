@@ -13,6 +13,17 @@ class RecipeRepository(private val apiService: SpoonacularApiService) {
             emptyList()
         }
     }
+
+    suspend fun searchRecipes(query: String): List<Recipe> {
+        return try {
+            // Using complexSearch which returns a RecipeResponse
+            val response = apiService.searchRecipes(query = query, number = 20) // Fetch 20 results
+            response.results
+        } catch (e: Exception) {
+            println("Error searching recipes: ${e.message}")
+            emptyList()
+        }
+    }
     suspend fun getRecipeDetails(id: Int): Recipe? {
         return try {
             apiService.getRecipeInformation(id)

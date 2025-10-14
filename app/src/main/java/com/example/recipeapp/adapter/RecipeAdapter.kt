@@ -1,4 +1,5 @@
 package com.example.recipeapp.adapter
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,8 +34,10 @@ class RecipeAdapter(private var recipes: List<Recipe>) : RecyclerView.Adapter<Re
             .into(holder.recipeImage)
 
         holder.itemView.setOnClickListener {
-            val direction = HomeFragmentDirections.actionNavHomeToRecipeDetailsFragment(currentRecipe)
-            holder.itemView.findNavController().navigate(direction)
+            val bundle = Bundle().apply {
+                putParcelable("recipe", currentRecipe)
+            }
+            holder.itemView.findNavController().navigate(R.id.action_global_recipeDetailsFragment, bundle)
         }
     }
 

@@ -21,6 +21,11 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
+    private val _savedRecipes = MutableLiveData<List<Recipe>>()
+    val savedRecipes: LiveData<List<Recipe>> = _savedRecipes
+
+    private val _isRecipeSaved = MutableLiveData<Boolean>()
+    val isRecipeSaved: LiveData<Boolean> = _isRecipeSaved
 
     private var currentPage = 1
     private var isFetching = false
@@ -83,6 +88,49 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
                 _errorMessage.postValue("Failed to load details: ${e.message}")
             } finally {
                 _isLoading.postValue(false)
+            }
+        }
+    }
+
+    fun fetchSavedRecipes() {
+        viewModelScope.launch {
+            _isLoading.postValue(true)
+            try {
+                val saved = repository.getSavedRecipes()
+                _savedRecipes.postValue(saved)
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to fetch saved recipes: ${e.message}")
+            } finally {
+                _isLoading.postValue(false)
+            }
+        }
+    }
+
+    fun toggleSaveRecipe(recipe: Recipe) {
+        viewModelScope.launch {
+            val isCurrentlySaved = _isRecipeSaved.value ?: false
+            try {
+                if (isCurrentlySaved) {
+                    repository.removeRecipe(recipe.id)
+                    _isRecipeSaved.postValue(false)
+                } else {
+                    repository.saveRecipe(recipe)
+                    _isRecipeSaved.postValue(true)
+                }
+            } catch (e: Exception) {
+                _errorMessage.postValue("Error updating saved state: ${e.message}")
+            }
+        }
+    }
+
+    fun checkIfRecipeIsSaved(recipeId: Int) {
+        viewModelScope.launch {
+            try {
+                val isSaved = repository.isRecipeSaved(recipeId)
+                _isRecipeSaved.postValue(isSaved)
+            } catch (e: Exception) {
+                // Handle error, maybe post a default value
+                _isRecipeSaved.postValue(false)
             }
         }
     }

@@ -21,6 +21,8 @@ import com.example.recipeapp.model.RecipeRepository
 import com.example.recipeapp.network.RetrofitInstance
 import com.example.recipeapp.viewmodel.RecipeViewModel
 import com.example.recipeapp.viewmodel.RecipeViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class HomeFragment : Fragment() {
 
@@ -47,7 +49,9 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val apiService = RetrofitInstance.api
-        val recipeRepository = RecipeRepository(apiService)
+        val firestore = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val recipeRepository = RecipeRepository(apiService, firestore, auth)
         val factory = RecipeViewModelFactory(recipeRepository)
 
         recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)

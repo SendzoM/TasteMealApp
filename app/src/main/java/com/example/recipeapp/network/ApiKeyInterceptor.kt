@@ -5,7 +5,7 @@ import okhttp3.Response
 
 class ApiKeyInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val apiKey = "ae4fd6a66a1d4f8aadf2366b706feb06"
+        val apiKey = "2d5c7c7c64e34010a0748f7fb898cf8e"
         val original = chain.request()
         val newUrl = original.url.newBuilder()
             .addQueryParameter("apiKey", apiKey)

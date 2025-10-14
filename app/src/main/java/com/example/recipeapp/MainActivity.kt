@@ -23,6 +23,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.recipeapp.R
 import com.example.recipeapp.auth.Login
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -54,12 +55,13 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
 
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        val bottomNavView = findViewById<BottomNavigationView>(R.id.bottom_nav_view) // Get reference
         //navigationView.setNavigationItemSelectedListener(this)
 
         // Define top-level destinations (fragments that don't show a "back" arrow)
         // These should match the IDs in your nav_menu.xml
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.nav_home, R.id.nav_about, R.id.nav_settings), // Add all your menu items here
+            setOf(R.id.nav_home,R.id.nav_saved_recipes, R.id.nav_about, R.id.nav_settings), // Add all your menu items here
             drawerLayout
         )
 
@@ -69,6 +71,8 @@ class MainActivity : AppCompatActivity() {
         // Connect the NavigationView to the NavController
         // This automatically handles clicks and navigates to the correct fragment
         navigationView.setupWithNavController(navController)
+
+        bottomNavView.setupWithNavController(navController) // Connect to NavController
 
         navigationView.setNavigationItemSelectedListener { menuItem ->
             // Handle logout separately

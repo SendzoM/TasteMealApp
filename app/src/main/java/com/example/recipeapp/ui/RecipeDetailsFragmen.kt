@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -19,18 +20,26 @@ import com.example.recipeapp.model.RecipeRepository
 import com.example.recipeapp.network.RetrofitInstance
 import com.example.recipeapp.viewmodel.RecipeViewModel
 import com.example.recipeapp.viewmodel.RecipeViewModelFactory
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RecipeDetailsFragment : Fragment() {
 
     private lateinit var recipeViewModel: RecipeViewModel
+    private var currentRecipe: Recipe? = null // Store the current recipe
+    private lateinit var saveFab: FloatingActionButton // Reference to the FAB
+
     private var recipeId: Int = -1
+    private lateinit var passedRecipe: Recipe // To hold the recipe passed via navigation
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Get the recipe ID and basic info from the navigation arguments
         arguments?.let {
             val safeArgs = RecipeDetailsFragmentArgs.fromBundle(it)
-            recipeId = safeArgs.recipe.id
+            passedRecipe = safeArgs.recipe
+            recipeId = passedRecipe.id
         }
     }
 
@@ -39,28 +48,55 @@ class RecipeDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recipe_details, container, false)
-    }
+        val view = inflater.inflate(R.layout.fragment_recipe_details, container, false)
+        saveFab = view.findViewById(R.id.fab_save_recipe) // Initialize the FAB
+        return view    }
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val apiService = RetrofitInstance.api
-        val recipeRepository = RecipeRepository(apiService)
+        val firestore = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val recipeRepository = RecipeRepository(apiService, firestore, auth)
         val factory = RecipeViewModelFactory(recipeRepository)
         recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)
 
         // Observe the detailed recipe LiveData
         recipeViewModel.recipeDetails.observe(viewLifecycleOwner, Observer { recipe ->
             recipe?.let {
+                currentRecipe = it
                 populateUi(it)
             }
         })
 
-        // Fetch the details using the ID from arguments
+        // Observe the saved status from the ViewModel
+        recipeViewModel.isRecipeSaved.observe(viewLifecycleOwner, Observer { isSaved ->
+            updateFabIcon(isSaved)
+        })
+
+        // Set up the FAB click listener
+        saveFab.setOnClickListener {
+            currentRecipe?.let { recipeToSave ->
+                recipeViewModel.toggleSaveRecipe(recipeToSave)
+                val message = if (recipeViewModel.isRecipeSaved.value == true) "Recipe Unsaved" else "Recipe Saved"
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Fetch details and check saved state
         if (recipeId != -1) {
             recipeViewModel.fetchRecipeDetails(recipeId)
+            recipeViewModel.checkIfRecipeIsSaved(recipeId) // Check if it's already saved
+        }
+    }
+
+    private fun updateFabIcon(isSaved: Boolean) {
+        if (isSaved) {
+            saveFab.setImageResource(R.drawable.baseline_bookmark_filled) // Filled icon
+        } else {
+            saveFab.setImageResource(R.drawable.baseline_save) // Border icon
         }
     }
 
@@ -68,21 +104,19 @@ class RecipeDetailsFragment : Fragment() {
     private fun populateUi(recipe: Recipe) {
         view?.apply {
             findViewById<TextView>(R.id.recipe_title).text = recipe.title
-            findViewById<TextView>(R.id.recipe_summary).text = Html.fromHtml(recipe.summary, Html.FROM_HTML_MODE_COMPACT)
+            val summaryHtml = recipe.summary ?: "No summary available."
+            findViewById<TextView>(R.id.recipe_summary).text = Html.fromHtml(summaryHtml, Html.FROM_HTML_MODE_COMPACT)
 
             val imageView = findViewById<ImageView>(R.id.recipe_image)
             Glide.with(requireContext()).load(recipe.image).into(imageView)
 
             // --- POPULATE NEW FIELDS ---
             // Format and display ingredients
-            val ingredientsTextView = findViewById<TextView>(R.id.recipe_ingredients)
             val ingredientsText = recipe.extendedIngredients?.joinToString(separator = "\n") { "- ${it.original}" } ?: "No ingredients available."
-            ingredientsTextView.text = ingredientsText
+            findViewById<TextView>(R.id.recipe_ingredients).text = ingredientsText
 
-            // Format and display instructions
-            val instructionsTextView = findViewById<TextView>(R.id.recipe_instructions)
             val instructionsText = recipe.analyzedInstructions?.firstOrNull()?.steps?.joinToString(separator = "\n") { "${it.number}. ${it.step}" } ?: "No instructions available."
-            instructionsTextView.text = instructionsText
+            findViewById<TextView>(R.id.recipe_instructions).text = instructionsText
         }
     }
 }

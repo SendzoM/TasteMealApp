@@ -63,9 +63,14 @@ class RecipeDetailsFragment : Fragment() {
         val factory = RecipeViewModelFactory(recipeRepository)
         recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)
 
+        // Immediately populate the UI with the recipe that was passed to the fragment.
+        populateUi(passedRecipe)
+        //Set the currentRecipe so the save button works instantly.
+        currentRecipe = passedRecipe
+
         // Observe the detailed recipe LiveData
-        recipeViewModel.recipeDetails.observe(viewLifecycleOwner, Observer { recipe ->
-            recipe?.let {
+        recipeViewModel.recipeDetails.observe(viewLifecycleOwner, Observer { detailedRecipe ->
+            detailedRecipe?.let {
                 currentRecipe = it
                 populateUi(it)
             }
@@ -80,7 +85,8 @@ class RecipeDetailsFragment : Fragment() {
         saveFab.setOnClickListener {
             currentRecipe?.let { recipeToSave ->
                 recipeViewModel.toggleSaveRecipe(recipeToSave)
-                val message = if (recipeViewModel.isRecipeSaved.value == true) "Recipe Unsaved" else "Recipe Saved"
+                val willBeSaved = !(recipeViewModel.isRecipeSaved.value ?: false)
+                val message = if (willBeSaved) "Recipe Saved" else "Recipe Unsaved"
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }
         }
@@ -110,7 +116,6 @@ class RecipeDetailsFragment : Fragment() {
             val imageView = findViewById<ImageView>(R.id.recipe_image)
             Glide.with(requireContext()).load(recipe.image).into(imageView)
 
-            // --- POPULATE NEW FIELDS ---
             // Format and display ingredients
             val ingredientsText = recipe.extendedIngredients?.joinToString(separator = "\n") { "- ${it.original}" } ?: "No ingredients available."
             findViewById<TextView>(R.id.recipe_ingredients).text = ingredientsText

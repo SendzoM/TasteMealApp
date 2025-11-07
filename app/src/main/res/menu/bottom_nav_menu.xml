@@ -4,10 +4,10 @@
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/baseline_search"
-        android:title="Explore"/>
+        android:title="@string/explore"/>
     <item
         android:id="@+id/nav_saved_recipes"
         android:icon="@drawable/baseline_save"
-        android:title="Saved Recipes"/>
+        android:title="@string/saved"/>
 
 </menu>

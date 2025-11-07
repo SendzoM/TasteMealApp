@@ -100,10 +100,7 @@ class Login : AppCompatActivity() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
-                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                        finish()
+                        navigateToMainActivity()
                     } else {
                         Toast.makeText(
                             this,
@@ -115,7 +112,6 @@ class Login : AppCompatActivity() {
         }
         createAccountLink.setOnClickListener {
             startActivity(Intent(this, CreateAccount::class.java))
-            finish()
         }
     }
 
@@ -157,11 +153,12 @@ class Login : AppCompatActivity() {
                 }
             }
     }
-}
-
-private fun Login.navigateToMainActivity() {
-    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-    val intent = Intent(this, MainActivity::class.java)
-    startActivity(intent)
-    finish() // Finish Login activity so user can't go back
+    private fun navigateToMainActivity() {
+        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, MainActivity::class.java)
+        // These flags ensure the back stack is cleared.
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish() // Finish Login activity so user can't go back
+    }
 }

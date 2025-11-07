@@ -111,7 +111,6 @@ class CreateAccount : AppCompatActivity() {
 
           Sign_in_link.setOnClickListener {
            startActivity(Intent(this, Login::class.java))
-           finish()
           }
     }
 }

@@ -22,7 +22,9 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlin.collections.set
 
 class Login : AppCompatActivity() {
 
@@ -43,8 +45,8 @@ class Login : AppCompatActivity() {
                 firebaseAuthWithGoogle(account)
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
-                Toast.makeText(this, "Google sign in failed: ${e.statusCode}", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(this, "Google sign in failed: ${e.statusCode}", Toast.LENGTH_SHORT).show()
+                Log.e("Login", "Google sign in failed", e)
             }
         }
     }
@@ -127,6 +129,9 @@ class Login : AppCompatActivity() {
                     val user = auth.currentUser!!
                     val isNewUser = task.result?.additionalUserInfo?.isNewUser == true
 
+                    // Get FCM token and save it regardless of whether the user is new or existing.
+                    getAndSaveFcmToken(user.uid)
+
                     if (isNewUser) {
                         // If it's a new user, save their info to Firestore
                         val userMap = hashMapOf(
@@ -134,24 +139,19 @@ class Login : AppCompatActivity() {
                             "email" to user.email
                         )
                         db.collection("users").document(user.uid)
-                            .set(userMap)
+                            .set(userMap, SetOptions.merge())
                             .addOnSuccessListener {
                                 // After saving, proceed to the main app
                                 navigateToMainActivity()
                             }
                             .addOnFailureListener { e ->
                                 Toast.makeText(
-                                    this,
+                                    this@Login,
                                     "Failed to save user details: ${e.message}",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                navigateToMainActivity()
                             }
-                        val user = auth.currentUser!!
-                        getAndSaveFcmToken(user.uid)
-
-                        if (task.result?.additionalUserInfo?.isNewUser == true) {
-                            // ...
-                            navigateToMainActivity()
                         } else {
                             // If it's an existing user, just proceed to the main app
                             navigateToMainActivity()
@@ -159,26 +159,20 @@ class Login : AppCompatActivity() {
                     } else {
                         // If sign in fails, display a message to the user.
                         Toast.makeText(
-                            this,
+                            this@Login,
                             "Firebase Authentication Failed: ${task.exception?.message}",
                             Toast.LENGTH_LONG
                         ).show()
                     }
                 }
             }
-    }
 
     private fun navigateToMainActivity() {
-        auth.currentUser?.uid?.let { userId ->
-            getAndSaveFcmToken(userId)
-        }
-
-        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
         val intent = Intent(this, MainActivity::class.java)
-        // These flags ensure the back stack is cleared.
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-        finish() // Finish Login activity so user can't go back
+        finish()
     }
 
     private fun getAndSaveFcmToken(userId: String) {
@@ -189,18 +183,16 @@ class Login : AppCompatActivity() {
             }
 
             // Get new FCM registration token
-            val token = task.result
-
-            // Log and save to Firestore
+            val token = task.result ?: return@addOnCompleteListener
             Log.d("FCM", "FCM Token: $token")
             val tokenData = hashMapOf("fcmToken" to token)
+
+            // Use set with merge to create the field if it doesn't exist, or update it if it does.
+            // This is safer than using update() which fails if the document doesn't exist.
             db.collection("users").document(userId)
-                .update(tokenData as Map<String, Any>) // Use update to avoid overwriting user data
-                .addOnFailureListener {
-                    // If update fails, it might be a new user, so try set with merge
-                    db.collection("users").document(userId)
-                        .set(tokenData, com.google.firebase.firestore.SetOptions.merge())
-                }
+                .set(tokenData, SetOptions.merge())
         }
     }
 }
+
+

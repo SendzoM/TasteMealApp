@@ -50,7 +50,7 @@
             android:layout_height="50dp"
             android:background="#D5D2D2"
             android:hint="@string/enter_username"
-            android:inputType="textEmailAddress"
+            android:inputType="text"
             android:padding="12dp"/>
 
         <TextView

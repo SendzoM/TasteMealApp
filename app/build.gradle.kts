@@ -67,6 +67,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     // Firebase Libraries (no versions needed with BoM)
     implementation("com.google.firebase:firebase-auth-ktx")

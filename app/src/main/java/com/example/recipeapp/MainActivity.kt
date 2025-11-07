@@ -1,10 +1,15 @@
 package com.example.recipeapp;
 
+import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
@@ -36,10 +41,41 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recipeViewModel: RecipeViewModel
 
 
+    // Create a launcher to request the notification permission.
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Permission is granted. You can now send notifications.
+            // You can also get the FCM token here if you want to be sure.
+        } else {
+            // Explain to the user that the feature is unavailable because the
+            // features requires a permission that the user has denied.
+            // You can show a Toast or a dialog.
+        }
+    }
+
+    private fun askNotificationPermission() {
+        // This is only necessary for API level 33 and above (Android 13+).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // FCM SDK (and your app) can post notifications.
+            } else {
+                // Directly ask for the permission.
+                // The launcher will handle the result.
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         LocaleHelper.loadLocale(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        askNotificationPermission()
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()

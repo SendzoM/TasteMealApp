@@ -30,7 +30,7 @@
         android:id="@+id/no_saved_recipes_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="You haven't saved any recipes yet."
+        android:text="@string/no_saved_recipes_yet"
         android:textSize="18sp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"

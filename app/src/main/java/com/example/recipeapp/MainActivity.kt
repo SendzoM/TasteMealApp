@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        LocaleHelper.loadLocale(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 

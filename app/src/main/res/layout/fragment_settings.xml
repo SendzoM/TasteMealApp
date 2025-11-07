@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Recipe Category"
+        android:text="@string/recipe_category"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="8dp"/>
@@ -25,7 +25,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Allergies"
+        android:text="@string/allergies"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginTop="16dp"
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="48dp"
-        android:hint="e.g., peanuts, gluten, dairy"
+        android:hint="@string/allergies_hint"
         android:inputType="text"
         android:background="@android:drawable/editbox_background"
         android:padding="8dp"/>
@@ -45,7 +45,36 @@
         android:id="@+id/apply_settings_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Apply and View Recipes"
+        android:text="@string/apply_and_view_recipes"
         android:layout_marginTop="24dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/language"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="8dp"/>
+
+    <RadioGroup
+        android:id="@+id/language_radio_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/english_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/english"
+            android:layout_marginEnd="16dp"/>
+
+        <RadioButton
+            android:id="@+id/zulu_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/zulu"/>
+    </RadioGroup>
 
 </LinearLayout>

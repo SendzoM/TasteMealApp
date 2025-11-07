@@ -1,6 +1,59 @@
 <resources>
     <string name="app_name">TasteMeal</string>
     <string name="add_recipe">Add Recipe</string>
+    <!-- General & Common -->
+    <string name="recipes">Recipes</string>
+    <string name="recipe_details">Recipe Details</string>
+    <string name="search_for_recipes">Search for recipes…</string>
+    <string name="explore">Explore</string>
+    <string name="saved">Saved</string>
+    <string name="login_successful">Login successful</string>
+    <string name="recipe_saved">Recipe Saved</string>
+    <string name="recipe_unsaved">Recipe Unsaved</string>
+    <string name="no_summary_available">No summary available.</string>
+    <string name="no_ingredients_available">No ingredients available.</string>
+    <string name="no_instructions_available">No instructions available.</string>
+
+    <!-- Login & Create Account -->
+    <string name="create_account">Create Account</string>
+    <string name="sign_in">Sign In</string>
+    <string name="username">Username</string>
+    <string name="enter_username">Enter Username</string>
+    <string name="email">Email</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="password">Password</string>
+    <string name="enter_your_password">Enter your password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="confirm_your_password">Confirm your password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="already_have_an_account">Already have an account? </string>
+    <string name="dont_have_account">Don\'t have an account? </string>
+    <string name="sign_in_with_google">Sign in With Google</string>
+    <string name="user_created_successfully">User created successfully</string>
+
+    <!-- Navigation Drawer & Menu -->
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
+    <string name="about_us">About Us</string>
+    <string name="logout">Logout</string>
+    <string name="saved_recipes">Saved Recipes</string>
+
+    <!-- Settings Fragment -->
+    <string name="recipe_category">Recipe Category</string>
+    <string name="allergies">Allergies</string>
+    <string name="allergies_hint">e.g., peanuts, gluten, dairy</string>
+    <string name="apply_and_view_recipes">Apply and View Recipes</string>
+    <string name="language">Language</string>
+    <string name="english">English</string>
+    <string name="zulu">Zulu</string>
+
+    <!-- Recipe Details -->
+    <string name="ingredients">Ingredients</string>
+    <string name="instructions">Instructions</string>
+
+    <!-- Saved Recipes Fragment -->
+    <string name="no_saved_recipes_yet">You haven\'t saved any recipes yet.</string>
+
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
     <!-- TODO: Remove or change this placeholder text -->

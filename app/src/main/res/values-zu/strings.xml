@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TasteMeal</string>
+
+    <!-- General & Common -->
+    <string name="add_recipe">Engeza Iresiphi</string>
+    <string name="recipes">Amaresiphi</string>
+    <string name="recipe_details">Imininingwane Yeresiphi</string>
+    <string name="search_for_recipes">Sesha amaresiphi…</string>
+    <string name="explore">Hlola</string>
+    <string name="saved">Kulondoloziwe</string>
+    <string name="login_successful">Ukungena ngemvume kuphumelele</string>
+    <string name="recipe_saved">Iresiphi Ilondoloziwe</string>
+    <string name="recipe_unsaved">Iresiphi Ayilondoloziwe</string>
+    <string name="no_summary_available">Akukho sifinyeto esitholakalayo.</string>
+    <string name="no_ingredients_available">Azikho izithako ezitholakalayo.</string>
+    <string name="no_instructions_available">Ayikho imiyalelo etholakalayo.</string>
+
+    <!-- Login & Create Account -->
+    <string name="create_account">Dala i-Akhawunti</string>
+    <string name="sign_in">Ngena</string>
+    <string name="username">Igama lomsebenzisi</string>
+    <string name="enter_username">Faka igama lomsebenzisi</string>
+    <string name="email">I-imeyili</string>
+    <string name="enter_your_email">Faka i-imeyili yakho</string>
+    <string name="password">Iphasiwedi</string>
+    <string name="enter_your_password">Faka iphasiwedi yakho</string>
+    <string name="confirm_password">Qinisekisa Iphasiwedi</string>
+    <string name="confirm_your_password">Qinisekisa iphasiwedi yakho</string>
+    <string name="sign_up">Bhalisa</string>
+    <string name="already_have_an_account">Usuvele unayo i-akhawunti? </string>
+    <string name="dont_have_account">Awunayo i-akhawunti? </string>
+    <string name="sign_in_with_google">Ngena nge-Google</string>
+    <string name="user_created_successfully">Umsebenzisi udalwe ngempumelelo</string>
+
+    <!-- Navigation Drawer & Menu -->
+    <string name="home">Ekhaya</string>
+    <string name="settings">Izilungiselelo</string>
+    <string name="about_us">Mayelana Nathi</string>
+    <string name="logout">Phuma</string>
+    <string name="saved_recipes">Amaresiphi Alondoloziwe</string>
+
+    <!-- Settings Fragment -->
+    <string name="recipe_category">Isigaba seresiphi</string>
+    <string name="allergies">Okungizwanayo Nomzimba</string>
+    <string name="allergies_hint">isib., amakinati, i-gluten, ubisi</string>
+    <string name="apply_and_view_recipes">Faka futhi ubuke amaresiphi</string>
+    <string name="language">Ulimi</string>
+    <string name="english">IsiNgisi</string>
+    <string name="zulu">isiZulu</string>
+
+    <!-- Recipe Details -->
+    <string name="ingredients">Izithako</string>
+    <string name="instructions">Imiyalelo</string>
+
+    <!-- Saved Recipes Fragment -->
+    <string name="no_saved_recipes_yet">Awukagcini noma yimaphi amaresiphi okwamanje.</string>
+</resources>

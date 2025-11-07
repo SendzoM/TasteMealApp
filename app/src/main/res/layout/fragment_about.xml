@@ -28,7 +28,7 @@
             android:id="@+id/about_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="About RecipeApp"
+            android:text="@string/about_us"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorPrimary"

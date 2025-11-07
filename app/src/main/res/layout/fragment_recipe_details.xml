@@ -43,7 +43,7 @@
             <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ingredients"
+            android:text="@string/ingredients"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp"/>
@@ -59,7 +59,7 @@
             <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Instructions"
+            android:text="@string/instructions"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp"/>
@@ -84,6 +84,6 @@
         app:backgroundTint="@color/red"
         app:tint="@android:color/white"
         android:src="@drawable/baseline_save"
-        android:contentDescription="Save Recipe" />
+        android:contentDescription="@string/recipe_saved" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

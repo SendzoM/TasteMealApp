@@ -84,6 +84,7 @@ Create an account or log in to start saving your favorite recipes
 📚 API Reference
 This project uses the Spoonacular API for recipe data.
 You’ll need to obtain your own API key from their website.
+Youtube video: https://youtu.be/h81H5NJYrrU 
 
 📬 Contact
 Have questions or suggestions? We'd love to hear from you!

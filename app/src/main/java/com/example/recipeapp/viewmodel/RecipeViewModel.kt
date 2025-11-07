@@ -1,28 +1,31 @@
 package com.example.recipeapp.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.recipeapp.model.Recipe
 import com.example.recipeapp.model.RecipeRepository
+import com.example.recipeapp.model.RecipeSearchResponse
 import kotlinx.coroutines.launch
-
 
 class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
 
+    // Main LiveData for displaying lists of recipes (used for both search and categories)
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> = _recipes
+
+    // LiveData for the details screen
     private val _recipeDetails = MutableLiveData<Recipe?>()
     val recipeDetails: LiveData<Recipe?> = _recipeDetails
-    //
+
+    // LiveData for saved recipes
+    private val _savedRecipes = MutableLiveData<List<Recipe>>()
+    val savedRecipes: LiveData<List<Recipe>> = _savedRecipes
+
+    // LiveData for UI state management
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> = _errorMessage
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
-    private val _savedRecipes = MutableLiveData<List<Recipe>>()
-    val savedRecipes: LiveData<List<Recipe>> = _savedRecipes
 
     private val _isRecipeSaved = MutableLiveData<Boolean>()
     val isRecipeSaved: LiveData<Boolean> = _isRecipeSaved
@@ -31,37 +34,38 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     private var isFetching = false
     private var currentCategory: String? = null
 
+    // Enhanced functionality (from second implementation)
     fun loadRecipes(category: String?) {
         viewModelScope.launch {
-        // If the category has changed, reset the list and page number
-        if (category != currentCategory) {
-            currentPage = 1
-            _recipes.postValue(emptyList()) // Clear the list on UI
-            currentCategory = category
-        }
-        // Prevent multiple simultaneous requests
-        if (isFetching) return@launch
-        isFetching = true
+            // If the category has changed, reset the list and page number
+            if (category != currentCategory) {
+                currentPage = 1
+                _recipes.postValue(emptyList()) // Clear the list on UI
+                currentCategory = category
+            }
+            // Prevent multiple simultaneous requests
+            if (isFetching) return@launch
+            isFetching = true
 
-        _isLoading.postValue(true)
-         try {
-             val tags = if (category.equals("random", ignoreCase = true)) null else category
-             val newRecipes = repository.getRecipes(currentPage, tags)
-             if (newRecipes.isNotEmpty()) {
-              // Get the current list, or an empty list if it's the first time
-                 val currentList = _recipes.value ?: emptyList()
-                 // Add the new recipes to the existing list
-                 _recipes.postValue(currentList + newRecipes)
-                 currentPage++ // Increment the page for the next request
-                  }
-                } catch (e: Exception) {
-                    _errorMessage.postValue("Failed to load recipes: ${e.message}")
-                } finally {
-                    _isLoading.postValue(false)
-                    isFetching = false // Allow new requests
+            _isLoading.postValue(true)
+            try {
+                val tags = if (category.equals("random", ignoreCase = true)) null else category
+                val newRecipes = repository.getRecipes(currentPage, tags)
+                if (newRecipes.isNotEmpty()) {
+                    // Get the current list, or an empty list if it's the first time
+                    val currentList = _recipes.value ?: emptyList()
+                    // Add the new recipes to the existing list
+                    _recipes.postValue(currentList + newRecipes)
+                    currentPage++ // Increment the page for the next request
                 }
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to load recipes: ${e.message}")
+            } finally {
+                _isLoading.postValue(false)
+                isFetching = false // Allow new requests
             }
         }
+    }
 
     fun searchRecipes(query: String) {
         viewModelScope.launch {
@@ -112,11 +116,10 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
             try {
                 if (isCurrentlySaved) {
                     repository.removeRecipe(recipe.id)
-                    _isRecipeSaved.postValue(false)
                 } else {
                     repository.saveRecipe(recipe)
-                    _isRecipeSaved.postValue(true)
                 }
+                _isRecipeSaved.postValue(!isCurrentlySaved)
             } catch (e: Exception) {
                 _errorMessage.postValue("Error updating saved state: ${e.message}")
             }
@@ -134,4 +137,18 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
             }
         }
     }
+
+    // Helper method to clear error messages
+    fun clearErrorMessage() {
+        _errorMessage.value = ""
+    }
+
+    /* Reset pagination and clear data
+    fun reset() {
+        currentPage = 1
+        currentCategory = null
+        _recipes.value = emptyList()
+        _recipeDetails.value = null
+        _errorMessage.value = ""
+    }*/
 }

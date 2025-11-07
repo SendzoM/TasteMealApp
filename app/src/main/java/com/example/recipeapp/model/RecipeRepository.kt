@@ -8,10 +8,22 @@ import kotlinx.coroutines.tasks.await
 class RecipeRepository(
     private val apiService: SpoonacularApiService,
     private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val recipeDao: RecipeDao
 ) {
-
     private fun getCurrentUserId(): String? = auth.currentUser?.uid
+
+    // --- Network Operations ---
+    suspend fun searchRecipes(query: String): List<Recipe> {
+        return try {
+            val response = apiService.searchRecipes(query = query, number = 20)
+            response.results // The response directly gives a List<Recipe>
+        } catch (e: Exception) {
+            println("Error searching recipes: ${e.message}")
+            emptyList()
+        }
+    }
+
     suspend fun getRecipes(page: Int, tags: String?): List<Recipe> {
         return try {
             val response = apiService.getRandomRecipes(number = 10, page = page, tags = tags)
@@ -22,16 +34,6 @@ class RecipeRepository(
         }
     }
 
-    suspend fun searchRecipes(query: String): List<Recipe> {
-        return try {
-            // Using complexSearch which returns a RecipeResponse
-            val response = apiService.searchRecipes(query = query, number = 20) // Fetch 20 results
-            response.results
-        } catch (e: Exception) {
-            println("Error searching recipes: ${e.message}")
-            emptyList()
-        }
-    }
     suspend fun getRecipeDetails(id: Int): Recipe? {
         return try {
             apiService.getRecipeInformation(id)
@@ -41,37 +43,51 @@ class RecipeRepository(
         }
     }
 
+    // --- Firebase & Room Operations ---
     suspend fun saveRecipe(recipe: Recipe) {
         getCurrentUserId()?.let { userId ->
-            // Use recipe.id as the document ID for easy checking and deletion
+            // Save to Firebase
             firestore.collection("users").document(userId)
                 .collection("savedRecipes").document(recipe.id.toString())
-                .set(recipe) // set() will create or overwrite
-                .await() // await() makes it a suspending function
+                .set(recipe)
+                .await()
+            // Also save locally
+            recipeDao.insertRecipe(recipe)
         }
     }
 
     suspend fun removeRecipe(recipeId: Int) {
         getCurrentUserId()?.let { userId ->
+            // Remove from Firebase
             firestore.collection("users").document(userId)
                 .collection("savedRecipes").document(recipeId.toString())
                 .delete()
                 .await()
+            // Also remove locally
+            val recipeToDelete = recipeDao.getRecipeById(recipeId)
+            recipeToDelete?.let { recipeDao.deleteRecipe(it) }
         }
     }
 
     suspend fun getSavedRecipes(): List<Recipe> {
-        val userId = getCurrentUserId() ?: return emptyList() // Return empty if no user is logged in
+        val userId = getCurrentUserId() ?: return emptyList()
         return try {
+            // Fetch from Firestore as the source of truth
             val snapshot = firestore.collection("users").document(userId)
                 .collection("savedRecipes")
                 .get()
                 .await()
-            // Convert all documents in the collection to Recipe objects
-            snapshot.toObjects(Recipe::class.java)
+            val savedRecipes = snapshot.toObjects(Recipe::class.java)
+
+            // Clear old local cache and insert fresh data
+            recipeDao.deleteAllRecipes()
+            savedRecipes.forEach { recipeDao.insertRecipe(it) }
+
+            savedRecipes
         } catch (e: Exception) {
-            println("Error fetching saved recipes: ${e.message}")
-            emptyList() // Return an empty list on failure
+            // If network fails, return what we have in the local cache
+            println("Error fetching from Firestore, falling back to local cache: ${e.message}")
+            recipeDao.getAllRecipes()
         }
     }
 
@@ -84,7 +100,9 @@ class RecipeRepository(
                 .await()
             doc.exists()
         } catch (e: Exception) {
-            false
+            // Fallback to check local cache
+            recipeDao.getRecipeById(recipeId) != null
         }
     }
+
 }

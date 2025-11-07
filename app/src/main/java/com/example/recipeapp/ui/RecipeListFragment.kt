@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.recipeapp.R
 import com.example.recipeapp.adapter.RecipeAdapter
 import com.example.recipeapp.model.Recipe
+import com.example.recipeapp.model.RecipeDatabase
 import com.example.recipeapp.model.RecipeRepository
 import com.example.recipeapp.network.RetrofitInstance
 import com.example.recipeapp.viewmodel.RecipeViewModel
@@ -43,10 +44,10 @@ class RecipeListFragment : Fragment() {
         val apiService = RetrofitInstance.api
         val firestore = FirebaseFirestore.getInstance()
         val auth = FirebaseAuth.getInstance()
-        val recipeRepository = RecipeRepository(apiService, firestore, auth)
+        val recipeDao = RecipeDatabase.getDatabase(requireContext()).recipeDao()
+        val recipeRepository = RecipeRepository(apiService, firestore, auth, recipeDao)
         val factory = RecipeViewModelFactory(recipeRepository)
-
-        recipeViewModel = ViewModelProvider(this, factory).get(RecipeViewModel::class.java)
+        recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)
 
         recyclerView.layoutManager = LinearLayoutManager(context)
 

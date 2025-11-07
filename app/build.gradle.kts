@@ -55,6 +55,12 @@ android {
 }
 
 dependencies {
+    // Room Database
+    val roomVersion = "2.6.0" // Or the latest version
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion") //kapt for annotation processing
+    implementation("androidx.room:room-ktx:$roomVersion") //kotlin extensions for room
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.7.0-alpha03")
     implementation("com.google.android.material:material:1.11.0-alpha03")

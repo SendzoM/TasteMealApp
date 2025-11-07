@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipeapp.adapter.RecipeAdapter
 import com.example.recipeapp.model.Recipe
+import com.example.recipeapp.model.RecipeDatabase
 import com.example.recipeapp.model.RecipeRepository
 import com.example.recipeapp.network.RetrofitInstance
 import com.example.recipeapp.viewmodel.RecipeViewModel
@@ -48,16 +49,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val apiService = RetrofitInstance.api
-        val firestore = FirebaseFirestore.getInstance()
-        val auth = FirebaseAuth.getInstance()
-        val recipeRepository = RecipeRepository(apiService, firestore, auth)
-        val factory = RecipeViewModelFactory(recipeRepository)
-
-        recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)
-
-        // Initialize the adapter with an empty list first
+        recipeViewModel = ViewModelProvider(requireActivity()).get(RecipeViewModel::class.java)
+        // Initialize the adapter with an empty list
         recipeAdapter = RecipeAdapter(emptyList())
+
         val gridLayoutManager = GridLayoutManager(context, 2)
         recyclerView.layoutManager = gridLayoutManager
         recyclerView.adapter = recipeAdapter
@@ -65,14 +60,35 @@ class HomeFragment : Fragment() {
         val sharedPref = activity?.getSharedPreferences("RecipeAppPrefs", Context.MODE_PRIVATE)
         val savedCategory = sharedPref?.getString("SELECTED_CATEGORY", "random") ?: "random"
 
+        // Observe recipes list
         recipeViewModel.recipes.observe(viewLifecycleOwner, Observer { recipes ->
             recipeAdapter.updateRecipes(recipes ?: emptyList())
         })
 
+        // Observe error messages
+        recipeViewModel.errorMessage.observe(viewLifecycleOwner, Observer { errorMessage: String ->
+            if (errorMessage.isNotEmpty()) {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                recipeViewModel.clearErrorMessage() // Clear the error after showing
+            }
+        })
+
+        // Observe loading state
+        recipeViewModel.isLoading.observe(viewLifecycleOwner, Observer { isLoading: Boolean ->
+            // Only show the big progress bar if the list is empty
+            if (isLoading && recipeAdapter.itemCount == 0) {
+                progressBar.visibility = View.VISIBLE
+            } else {
+                progressBar.visibility = View.GONE
+            }
+        })
+
+        // Load initial data if needed
         if (recipeViewModel.recipes.value.isNullOrEmpty() && searchView.query.isNullOrBlank()) {
             recipeViewModel.loadRecipes(savedCategory)
         }
 
+        // Setup search functionality
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             // This is called when the user hits the search button
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -85,40 +101,39 @@ class HomeFragment : Fragment() {
 
             // This is called for every character change
             override fun onQueryTextChange(newText: String?): Boolean {
-                // If the search text is cleared, reload the category recipes
-                if (newText.isNullOrBlank()) {
-                        recipeViewModel.loadRecipes(savedCategory)
+                if (newText.isNullOrBlank() && searchView.hasFocus()) {
+                    // Only reload if the user clears the text while searching
+                    // This prevents reloading when the view is first created
                 }
                 return true
             }
         })
 
+        // Reload category recipes when search is closed
+        searchView.setOnCloseListener {
+            recipeViewModel.loadRecipes(savedCategory)
+            false
+        }
+
+        // Setup infinite scrolling for category loading
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                val visibleItemCount = gridLayoutManager.childCount
-                val totalItemCount = gridLayoutManager.itemCount
-                val firstVisibleItemPosition = gridLayoutManager.findFirstVisibleItemPosition()
 
-                val isLoading = recipeViewModel.isLoading.value ?: false
-                if (searchView.query.isNullOrBlank() && !isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
-                    recipeViewModel.loadRecipes(savedCategory)
+                if (searchView.query.isNullOrBlank()) {
+                    val visibleItemCount = gridLayoutManager.childCount
+                    val totalItemCount = gridLayoutManager.itemCount
+                    val firstVisibleItemPosition = gridLayoutManager.findFirstVisibleItemPosition()
+
+                    val isLoading = recipeViewModel.isLoading.value ?: false
+                    if (!isLoading &&
+                        (visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 4 && // Trigger loading a bit earlier
+                        firstVisibleItemPosition >= 0
+                    ) {
+                        recipeViewModel.loadRecipes(savedCategory)
+                    }
                 }
             }
         })
-
-        recipeViewModel.errorMessage.observe(viewLifecycleOwner, Observer { errorMessage: String ->
-            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-        })
-
-        recipeViewModel.isLoading.observe(viewLifecycleOwner, Observer { isLoading: Boolean ->
-            // Only show the big progress bar if the list is empty
-            if (isLoading && recipeAdapter.itemCount == 0) {
-                progressBar.visibility = View.VISIBLE
-            } else {
-                progressBar.visibility = View.GONE
-            }
-        })
     }
-
 }

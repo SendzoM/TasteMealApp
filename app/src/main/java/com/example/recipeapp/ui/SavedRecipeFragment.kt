@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipeapp.R
 import com.example.recipeapp.adapter.RecipeAdapter
+import com.example.recipeapp.model.RecipeDatabase
 import com.example.recipeapp.model.RecipeRepository
 import com.example.recipeapp.network.RetrofitInstance
 import com.example.recipeapp.viewmodel.RecipeViewModel
@@ -46,12 +47,7 @@ class SavedRecipeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val apiService = RetrofitInstance.api
-        val firestore = FirebaseFirestore.getInstance()
-        val auth = FirebaseAuth.getInstance()
-        val recipeRepository = RecipeRepository(apiService, firestore, auth)
-        val factory = RecipeViewModelFactory(recipeRepository)
-        recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)
+        recipeViewModel = ViewModelProvider(requireActivity()).get(RecipeViewModel::class.java)
 
         setupRecyclerView()
 

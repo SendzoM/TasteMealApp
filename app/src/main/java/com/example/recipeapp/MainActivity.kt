@@ -1,28 +1,26 @@
 package com.example.recipeapp;
 
 import androidx.appcompat.app.AppCompatActivity
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.ViewConfiguration
 import android.widget.TextView
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.recipeapp.R
 import com.example.recipeapp.auth.Login
+import com.example.recipeapp.model.RecipeDatabase
+import com.example.recipeapp.model.RecipeRepository
+import com.example.recipeapp.network.RetrofitInstance
+import com.example.recipeapp.viewmodel.RecipeViewModel
+import com.example.recipeapp.viewmodel.RecipeViewModelFactory
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -35,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-
+    private lateinit var recipeViewModel: RecipeViewModel
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,8 +43,14 @@ class MainActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val apiService = RetrofitInstance.api
+        val firestore = FirebaseFirestore.getInstance()
+        val recipeDao = RecipeDatabase.getDatabase(applicationContext).recipeDao()
+        val recipeRepository = RecipeRepository(apiService, firestore, auth, recipeDao)
+        val factory = RecipeViewModelFactory(recipeRepository)
+        recipeViewModel = ViewModelProvider(this, factory).get(RecipeViewModel::class.java)
 
+        drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -56,12 +60,11 @@ class MainActivity : AppCompatActivity() {
 
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         val bottomNavView = findViewById<BottomNavigationView>(R.id.bottom_nav_view) // Get reference
-        //navigationView.setNavigationItemSelectedListener(this)
 
         // Define top-level destinations (fragments that don't show a "back" arrow)
         // These should match the IDs in your nav_menu.xml
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.nav_home,R.id.nav_saved_recipes, R.id.nav_about, R.id.nav_settings), // Add all your menu items here
+            setOf(R.id.nav_home,R.id.nav_saved_recipes, R.id.nav_about, R.id.nav_settings),
             drawerLayout
         )
 
@@ -77,16 +80,8 @@ class MainActivity : AppCompatActivity() {
         navigationView.setNavigationItemSelectedListener { menuItem ->
             // Handle logout separately
             if (menuItem.itemId == R.id.nav_logout) {
-                // Clear saved category preference
-                val sharedPref = getSharedPreferences("RecipeAppPrefs", Context.MODE_PRIVATE)
-                with(sharedPref.edit()) {
-                    remove("SELECTED_CATEGORY")
-                    apply()
-                }
-
                 // Sign out from Firebase
                 auth.signOut()
-
                 // Redirect to Login screen
                 val intent = Intent(this, Login::class.java)
                 startActivity(intent)
@@ -181,7 +176,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-        override fun onSupportNavigateUp(): Boolean {
+    override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 

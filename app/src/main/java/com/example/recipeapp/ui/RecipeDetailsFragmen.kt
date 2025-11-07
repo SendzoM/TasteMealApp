@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.recipeapp.R
 import com.example.recipeapp.model.Recipe
+import com.example.recipeapp.model.RecipeDatabase
 import com.example.recipeapp.model.RecipeRepository
 import com.example.recipeapp.network.RetrofitInstance
 import com.example.recipeapp.viewmodel.RecipeViewModel
@@ -56,13 +57,7 @@ class RecipeDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val apiService = RetrofitInstance.api
-        val firestore = FirebaseFirestore.getInstance()
-        val auth = FirebaseAuth.getInstance()
-        val recipeRepository = RecipeRepository(apiService, firestore, auth)
-        val factory = RecipeViewModelFactory(recipeRepository)
-        recipeViewModel = ViewModelProvider(requireActivity(), factory).get(RecipeViewModel::class.java)
-
+        recipeViewModel = ViewModelProvider(requireActivity()).get(RecipeViewModel::class.java)
         // Immediately populate the UI with the recipe that was passed to the fragment.
         populateUi(passedRecipe)
         //Set the currentRecipe so the save button works instantly.

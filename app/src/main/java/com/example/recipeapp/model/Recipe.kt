@@ -1,10 +1,14 @@
 package com.example.recipeapp.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
+@Entity(tableName = "recipes")
 @Parcelize
 data class Recipe(
+    @PrimaryKey(autoGenerate = true)
     val id: Int,
     val title: String,
     val image: String,

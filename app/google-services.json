@@ -12,7 +12,12 @@
           "package_name": "com.example.recipeapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "660782234877-kie6n11ct15ujl7h97ae1kano4uldsrl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD_SuU4veV3TBh5aWOXEnLCpuOzcnR6z1M"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "660782234877-kie6n11ct15ujl7h97ae1kano4uldsrl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },
@@ -31,7 +41,12 @@
           "package_name": "com.example.tastemeal"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "660782234877-kie6n11ct15ujl7h97ae1kano4uldsrl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD_SuU4veV3TBh5aWOXEnLCpuOzcnR6z1M"
@@ -39,7 +54,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "660782234877-kie6n11ct15ujl7h97ae1kano4uldsrl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
